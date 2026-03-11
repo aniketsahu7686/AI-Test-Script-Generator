@@ -21,6 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class TestGeneratorService {
 
     private final OpenAiService openAiService;
+    private final AutomationScriptService automationScriptService;
     private final List<TestCase> currentTestCases = new CopyOnWriteArrayList<>();
     private final List<AutomationScript> currentScripts = new CopyOnWriteArrayList<>();
     private final SecureRandom random = new SecureRandom();
@@ -48,15 +49,7 @@ public class TestGeneratorService {
     public ScriptResponse generateScripts(List<TestCase> testCases) {
         log.info("Generating automation scripts for {} test cases", testCases.size());
 
-        List<AutomationScript> scripts = new ArrayList<>();
-        for (TestCase tc : testCases) {
-            String scriptContent = openAiService.generateAutomationScript(tc);
-            scripts.add(AutomationScript.builder()
-                    .testCaseId(tc.getId())
-                    .scenario(tc.getScenario())
-                    .scriptContent(scriptContent)
-                    .build());
-        }
+        List<AutomationScript> scripts = automationScriptService.generateScripts(testCases);
 
         currentScripts.clear();
         currentScripts.addAll(scripts);

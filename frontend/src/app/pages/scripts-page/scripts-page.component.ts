@@ -29,6 +29,9 @@ import { TestCase, AutomationScript } from '../../models/models';
             <button *ngIf="scripts.length > 0" class="btn btn-success" (click)="downloadAll()">
               <i class="fas fa-download"></i> Download All (.py)
             </button>
+            <button *ngIf="scripts.length > 0" class="btn btn-outline" (click)="downloadPython()">
+              <i class="fas fa-file-code"></i> Download Python
+            </button>
           </div>
         </div>
       </div>
@@ -277,6 +280,12 @@ export class ScriptsPageComponent {
   downloadAll() {
     this.api.downloadAllScripts().subscribe(blob => {
       this.saveFile(blob, 'automation_scripts.py');
+    });
+  }
+
+  downloadPython() {
+    this.api.downloadScriptsPython().subscribe(blob => {
+      this.saveFile(blob, 'playwright_scripts.py');
     });
   }
 

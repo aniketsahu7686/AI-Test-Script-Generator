@@ -34,7 +34,7 @@ export class ApiService {
   // Scripts
   generateScripts(testCases: TestCase[]): Observable<ScriptResponse> {
     return this.http.post<ScriptResponse>(
-      `${this.baseUrl}/scripts/generate`,
+      `${this.baseUrl}/scripts/generate-scripts`,
       { testCases }
     );
   }
@@ -62,6 +62,10 @@ export class ApiService {
 
   downloadAllScripts(): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/scripts/download-all`, { responseType: 'blob' });
+  }
+
+  downloadScriptsPython(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/scripts/download/scripts/python`, { responseType: 'blob' });
   }
 
   // Dashboard
