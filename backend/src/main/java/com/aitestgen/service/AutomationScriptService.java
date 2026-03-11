@@ -27,7 +27,13 @@ public class AutomationScriptService {
 
         List<AutomationScript> scripts = new ArrayList<>();
         for (TestCase tc : testCases) {
-            String scriptContent = openAiService.generateAutomationScript(tc);
+            String scriptContent;
+            try {
+                scriptContent = openAiService.generateAutomationScript(tc);
+            } catch (Exception e) {
+                log.warn("AI script generation failed for {}, using placeholder: {}", tc.getId(), e.getMessage());
+                scriptContent = generateFallbackScript(tc);
+            }
             scripts.add(AutomationScript.builder()
                     .testCaseId(tc.getId())
                     .scenario(tc.getScenario())
@@ -64,5 +70,28 @@ public class AutomationScriptService {
 
     public List<AutomationScript> getGeneratedScripts() {
         return new ArrayList<>(generatedScripts);
+    }
+
+    private String generateFallbackScript(TestCase tc) {
+        return String.format("""
+                from playwright.sync_api import sync_playwright
+
+                def test_%s():
+                    \"\"\"%s\"\"\"
+                    with sync_playwright() as p:
+                        browser = p.chromium.launch(headless=True)
+                        page = browser.new_page()
+                        page.goto("https://example.com")
+                        # TODO: Implement test steps
+                        # Expected: %s
+                        browser.close()
+
+                if __name__ == "__main__":
+                    test_%s()
+                """,
+                tc.getId().toLowerCase().replace("-", "_"),
+                tc.getScenario(),
+                tc.getExpectedResult(),
+                tc.getId().toLowerCase().replace("-", "_"));
     }
 }

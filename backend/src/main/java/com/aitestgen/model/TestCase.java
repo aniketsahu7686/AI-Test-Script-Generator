@@ -1,5 +1,6 @@
 package com.aitestgen.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TestCase {
+    @JsonProperty("testCaseId")
     private String id;
     private String scenario;
     private List<String> steps;

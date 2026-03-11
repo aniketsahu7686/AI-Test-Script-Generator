@@ -23,7 +23,11 @@ import { TestCase } from '../../models/models';
 
         <ng-container matColumnDef="steps">
           <th mat-header-cell *matHeaderCellDef>Steps</th>
-          <td mat-cell *matCellDef="let tc" class="steps-cell">{{ tc.steps }}</td>
+          <td mat-cell *matCellDef="let tc" class="steps-cell">
+            <ol class="steps-list">
+              <li *ngFor="let step of tc.steps">{{ step }}</li>
+            </ol>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="expectedResult">

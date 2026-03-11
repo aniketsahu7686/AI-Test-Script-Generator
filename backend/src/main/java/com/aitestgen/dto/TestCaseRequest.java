@@ -13,5 +13,5 @@ public class TestCaseRequest {
 
     @NotBlank(message = "Requirement text must not be blank")
     @Size(min = 10, max = 5000, message = "Requirement text must be between 10 and 5000 characters")
-    private String requirementText;
+    private String requirement;
 }

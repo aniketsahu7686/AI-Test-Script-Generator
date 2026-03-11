@@ -25,7 +25,7 @@ public class TestCaseController {
     @PostMapping("/generate")
     public ResponseEntity<TestCaseResponse> generateTestCases(
             @Valid @RequestBody TestCaseRequest request) {
-        TestCaseResponse response = testGeneratorService.generateTestCases(request.getRequirementText());
+        TestCaseResponse response = testGeneratorService.generateTestCases(request.getRequirement());
         return ResponseEntity.ok(response);
     }
 
@@ -35,8 +35,9 @@ public class TestCaseController {
     }
 
     @PostMapping("/simulate")
-    public ResponseEntity<List<ExecutionResult>> simulateExecution() {
-        return ResponseEntity.ok(testGeneratorService.simulateExecution());
+    public ResponseEntity<List<TestCase>> simulateExecution() {
+        testGeneratorService.simulateExecution();
+        return ResponseEntity.ok(testGeneratorService.getCurrentTestCases());
     }
 
     /**

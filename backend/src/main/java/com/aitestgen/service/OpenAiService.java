@@ -83,9 +83,15 @@ public class OpenAiService {
     public List<TestCase> generateTestCases(String requirement) {
         log.info("Generating test cases for requirement (length={})", requirement.length());
 
-        String userPrompt = "Generate test cases for the following requirement:\n\n" + requirement;
-        String response = callOpenAi(TEST_CASE_SYSTEM_PROMPT, userPrompt);
-        List<TestCase> testCases = parseTestCases(response);
+        List<TestCase> testCases;
+        try {
+            String userPrompt = "Generate test cases for the following requirement:\n\n" + requirement;
+            String response = callOpenAi(TEST_CASE_SYSTEM_PROMPT, userPrompt);
+            testCases = parseTestCases(response);
+        } catch (Exception e) {
+            log.warn("AI call failed, using fallback test cases: {}", e.getMessage());
+            testCases = generateFallbackTestCases();
+        }
 
         // Post-parse: ensure every test case has defaults for missing fields
         AtomicInteger counter = new AtomicInteger(1);

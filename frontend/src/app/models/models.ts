@@ -1,7 +1,7 @@
 export interface TestCase {
   testCaseId: string;
   scenario: string;
-  steps: string;
+  steps: string[];
   expectedResult: string;
   testType: string;
   executionStatus: string;

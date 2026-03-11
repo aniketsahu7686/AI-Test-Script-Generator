@@ -1,15 +1,34 @@
-# Dependencies
-node_modules/
+# --- System Files ---
+.DS_Store
+Thumbs.db
 
-# IDEs
+# --- Logic & Environment ---
+.env
+*.log
+
+# --- IDEs ---
 .vscode/
 .idea/
+*.swp
+*.iml
 
-# Build output
-dist/
-tmp/
-out/
+# --- Frontend (Angular/Node) ---
+**/node_modules/
+**/dist/
+**/.angular/
+**/.cache/
+**/npm-debug.log*
+**/yarn-error.log*
+**/.editorconfig
 
-# Logs and Env
-*.log
-.envgit config --global core.autocrlf true
+# --- Backend (Java/Maven) ---
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+**/.metadata/
+**/.recommenders/
+**/remote.properties
+**/.settings/
+**/.project
+**/.classpath
