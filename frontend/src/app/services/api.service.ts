@@ -43,17 +43,17 @@ export class ApiService {
     return this.http.get<AutomationScript[]>(`${this.baseUrl}/scripts`);
   }
 
-  // Exports
+  // Downloads
   downloadDocx(): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/export/docx`, { responseType: 'blob' });
+    return this.http.get(`${this.baseUrl}/download/testcases/docx`, { responseType: 'blob' });
   }
 
   downloadPdf(): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/export/pdf`, { responseType: 'blob' });
+    return this.http.get(`${this.baseUrl}/download/testcases/pdf`, { responseType: 'blob' });
   }
 
   downloadJson(): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/test-cases/json`, { responseType: 'blob' });
+    return this.http.get(`${this.baseUrl}/download/testcases/json`, { responseType: 'blob' });
   }
 
   downloadScript(testCaseId: string): Observable<Blob> {

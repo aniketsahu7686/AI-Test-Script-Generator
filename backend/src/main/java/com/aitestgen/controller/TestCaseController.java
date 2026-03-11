@@ -5,7 +5,6 @@ import com.aitestgen.dto.TestCaseResponse;
 import com.aitestgen.model.ExecutionResult;
 import com.aitestgen.model.TestCase;
 import com.aitestgen.service.TestGeneratorService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,6 @@ import java.util.List;
 public class TestCaseController {
 
     private final TestGeneratorService testGeneratorService;
-    private final ObjectMapper objectMapper;
 
     @PostMapping("/generate")
     public ResponseEntity<TestCaseResponse> generateTestCases(
@@ -38,17 +36,5 @@ public class TestCaseController {
         return ResponseEntity.ok(testGeneratorService.simulateExecution());
     }
 
-    @GetMapping("/json")
-    public ResponseEntity<String> downloadJson() {
-        try {
-            List<TestCase> testCases = testGeneratorService.getCurrentTestCases();
-            String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(testCases);
-            return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=test-cases.json")
-                    .header("Content-Type", "application/json")
-                    .body(json);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate JSON export");
-        }
-    }
+
 }

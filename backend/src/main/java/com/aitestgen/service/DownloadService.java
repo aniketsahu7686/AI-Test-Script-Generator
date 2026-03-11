@@ -1,23 +1,33 @@
 package com.aitestgen.service;
 
 import com.aitestgen.model.TestCase;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.*;
 import com.lowagie.text.Font;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.*;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
-public class ExportService {
+public class DownloadService {
 
+    private final ObjectMapper objectMapper;
+
+    /**
+     * Exports test cases as a DOCX document using Apache POI.
+     * Includes: Test Case ID, Scenario, Steps, Expected Result, Test Type.
+     */
     public byte[] exportToDocx(List<TestCase> testCases) {
         try (XWPFDocument document = new XWPFDocument();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -30,6 +40,15 @@ public class ExportService {
             titleRun.setBold(true);
             titleRun.setFontSize(18);
             titleRun.addBreak();
+
+            // Subtitle with count
+            XWPFParagraph subtitle = document.createParagraph();
+            subtitle.setAlignment(ParagraphAlignment.CENTER);
+            XWPFRun subRun = subtitle.createRun();
+            subRun.setText("Total Test Cases: " + testCases.size());
+            subRun.setFontSize(11);
+            subRun.setColor("666666");
+            subRun.addBreak();
 
             // Table
             XWPFTable table = document.createTable(testCases.size() + 1, 5);
@@ -48,7 +67,7 @@ public class ExportService {
                 XWPFTableRow row = table.getRow(i + 1);
                 setDocxCell(row.getCell(0), tc.getId(), false);
                 setDocxCell(row.getCell(1), tc.getScenario(), false);
-                setDocxCell(row.getCell(2), String.join("\n", tc.getSteps()), false);
+                setDocxCell(row.getCell(2), formatSteps(tc.getSteps()), false);
                 setDocxCell(row.getCell(3), tc.getExpectedResult(), false);
                 setDocxCell(row.getCell(4), tc.getTestType() != null ? tc.getTestType().name() : "", false);
             }
@@ -61,6 +80,10 @@ public class ExportService {
         }
     }
 
+    /**
+     * Exports test cases as a PDF document using OpenPDF.
+     * Includes: Test Case ID, Scenario, Steps, Expected Result, Test Type.
+     */
     public byte[] exportToPdf(List<TestCase> testCases) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Document document = new Document(PageSize.A4.rotate());
@@ -71,8 +94,15 @@ public class ExportService {
             Font titleFont = new Font(Font.HELVETICA, 18, Font.BOLD);
             Paragraph title = new Paragraph("AI Generated Test Cases", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
-            title.setSpacingAfter(20);
+            title.setSpacingAfter(5);
             document.add(title);
+
+            // Subtitle
+            Font subtitleFont = new Font(Font.HELVETICA, 11, Font.NORMAL, Color.GRAY);
+            Paragraph subtitle = new Paragraph("Total Test Cases: " + testCases.size(), subtitleFont);
+            subtitle.setAlignment(Element.ALIGN_CENTER);
+            subtitle.setSpacingAfter(20);
+            document.add(subtitle);
 
             // Table
             PdfPTable table = new PdfPTable(5);
@@ -93,7 +123,7 @@ public class ExportService {
             for (TestCase tc : testCases) {
                 addPdfCell(table, tc.getId(), cellFont);
                 addPdfCell(table, tc.getScenario(), cellFont);
-                addPdfCell(table, String.join("\n", tc.getSteps()), cellFont);
+                addPdfCell(table, formatSteps(tc.getSteps()), cellFont);
                 addPdfCell(table, tc.getExpectedResult(), cellFont);
                 addPdfCell(table, tc.getTestType() != null ? tc.getTestType().name() : "", cellFont);
             }
@@ -105,6 +135,34 @@ public class ExportService {
             log.error("Failed to generate PDF: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to generate PDF file");
         }
+    }
+
+    /**
+     * Exports test cases as pretty-printed JSON bytes.
+     * Returns the raw structured data with all fields.
+     */
+    public byte[] exportToJson(List<TestCase> testCases) {
+        try {
+            String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(testCases);
+            return json.getBytes(StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.error("Failed to generate JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to generate JSON file");
+        }
+    }
+
+    private String formatSteps(List<String> steps) {
+        if (steps == null || steps.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < steps.size(); i++) {
+            sb.append(i + 1).append(". ").append(steps.get(i));
+            if (i < steps.size() - 1) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 
     private void setDocxCell(XWPFTableCell cell, String text, boolean bold) {
