@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# IDEs
+.vscode/
+.idea/
+
+# Build output
+dist/
+tmp/
+out/
+
+# Logs and Env
+*.log
+.envgit config --global core.autocrlf true

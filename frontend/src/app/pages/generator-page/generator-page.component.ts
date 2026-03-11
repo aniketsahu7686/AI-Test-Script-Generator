@@ -1,6 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
 import { ApiService } from '../../services/api.service';
 import { TestCase } from '../../models/models';
 import { TestCaseTableComponent } from '../../components/test-case-table/test-case-table.component';
@@ -8,55 +15,77 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
 @Component({
   selector: 'app-generator-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, TestCaseTableComponent],
+  imports: [
+    CommonModule, FormsModule, MatCardModule, MatFormFieldModule,
+    MatInputModule, MatButtonModule, MatIconModule,
+    MatProgressSpinnerModule, MatDividerModule, TestCaseTableComponent
+  ],
   template: `
     <div class="page">
       <div class="page-header">
-        <h1><i class="fas fa-wand-magic-sparkles"></i> Test Case Generator</h1>
+        <h1>
+          <mat-icon class="header-icon">auto_fix_high</mat-icon>
+          Test Case Generator
+        </h1>
         <p>Paste a requirement or user story and let AI generate comprehensive test cases</p>
       </div>
 
       <!-- Input Section -->
-      <div class="card input-card">
-        <label class="input-label">Requirement / User Story</label>
-        <textarea
-          [(ngModel)]="requirement"
-          class="requirement-input"
-          placeholder="e.g., User should be able to login using email and password."
-          rows="4"
-        ></textarea>
-        <div class="input-actions">
-          <button
-            class="btn btn-primary"
+      <mat-card class="input-card">
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Requirement / User Story</mat-label>
+            <textarea
+              matInput
+              [(ngModel)]="requirement"
+              placeholder="e.g., User should be able to login using email and password."
+              rows="4">
+            </textarea>
+          </mat-form-field>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-raised-button color="primary"
             (click)="generateTestCases()"
             [disabled]="loading || !requirement.trim()">
-            <i class="fas" [ngClass]="loading ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'"></i>
+            <mat-spinner *ngIf="loading" [diameter]="20" class="btn-spinner"></mat-spinner>
+            <mat-icon *ngIf="!loading">auto_fix_high</mat-icon>
             {{ loading ? 'Generating...' : 'Generate Test Cases' }}
           </button>
-        </div>
-      </div>
+        </mat-card-actions>
+      </mat-card>
 
       <!-- Error -->
-      <div *ngIf="error" class="alert alert-error">
-        <i class="fas fa-circle-exclamation"></i> {{ error }}
-      </div>
+      <mat-card *ngIf="error" class="error-card">
+        <mat-card-content class="error-content">
+          <mat-icon class="error-icon">error</mat-icon>
+          {{ error }}
+        </mat-card-content>
+      </mat-card>
 
       <!-- Results -->
       <div *ngIf="testCases.length > 0" class="results-section">
         <div class="section-header">
-          <h2><i class="fas fa-list-check"></i> Generated Test Cases ({{ testCases.length }})</h2>
+          <h2>
+            <mat-icon class="header-icon">checklist</mat-icon>
+            Generated Test Cases ({{ testCases.length }})
+          </h2>
           <div class="action-buttons">
-            <button class="btn btn-outline" (click)="downloadDocx()">
-              <i class="fas fa-file-word"></i> DOCX
+            <button mat-stroked-button (click)="downloadDocx()">
+              <mat-icon>description</mat-icon> DOCX
             </button>
-            <button class="btn btn-outline" (click)="downloadPdf()">
-              <i class="fas fa-file-pdf"></i> PDF
+            <button mat-stroked-button (click)="downloadPdf()">
+              <mat-icon>picture_as_pdf</mat-icon> PDF
             </button>
-            <button class="btn btn-outline" (click)="downloadJson()">
-              <i class="fas fa-file-code"></i> JSON
+            <button mat-stroked-button (click)="downloadJson()">
+              <mat-icon>data_object</mat-icon> JSON
             </button>
-            <button class="btn btn-success" (click)="simulateExecution()" [disabled]="simulating">
-              <i class="fas" [ngClass]="simulating ? 'fa-spinner fa-spin' : 'fa-play'"></i>
+
+            <mat-divider [vertical]="true" class="btn-divider"></mat-divider>
+
+            <button mat-raised-button color="accent"
+              (click)="simulateExecution()" [disabled]="simulating">
+              <mat-spinner *ngIf="simulating" [diameter]="20" class="btn-spinner"></mat-spinner>
+              <mat-icon *ngIf="!simulating">play_arrow</mat-icon>
               {{ simulating ? 'Running...' : 'Simulate Execution' }}
             </button>
           </div>
@@ -83,117 +112,45 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
       gap: 0.75rem;
     }
 
-    .page-header h1 i { color: #6366f1; }
-
     .page-header p {
       color: #94a3b8;
       margin-top: 0.5rem;
       font-size: 0.95rem;
     }
 
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 1.5rem;
+    .header-icon {
+      color: #6366f1;
     }
 
-    .input-label {
-      display: block;
-      font-weight: 600;
-      color: #e2e8f0;
-      margin-bottom: 0.75rem;
-      font-size: 0.95rem;
+    .input-card {
+      margin-bottom: 1.5rem;
     }
 
-    .requirement-input {
+    .full-width {
       width: 100%;
-      background: #334155;
-      border: 1px solid #475569;
-      border-radius: 12px;
-      padding: 1rem;
-      color: #f1f5f9;
-      font-size: 0.95rem;
-      font-family: inherit;
-      resize: vertical;
-      transition: border-color 0.2s;
     }
 
-    .requirement-input:focus {
-      outline: none;
-      border-color: #6366f1;
+    .btn-spinner {
+      display: inline-block;
+      margin-right: 8px;
     }
 
-    .requirement-input::placeholder {
-      color: #64748b;
-    }
-
-    .input-actions {
-      display: flex;
-      justify-content: flex-end;
+    .error-card {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border: 1px solid rgba(239, 68, 68, 0.3) !important;
       margin-top: 1rem;
     }
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1.25rem;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.875rem;
-      border: none;
-      transition: all 0.2s;
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .btn-primary {
-      background: #6366f1;
-      color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: #818cf8;
-    }
-
-    .btn-success {
-      background: #10b981;
-      color: white;
-    }
-
-    .btn-success:hover:not(:disabled) {
-      background: #34d399;
-    }
-
-    .btn-outline {
-      background: transparent;
-      color: #94a3b8;
-      border: 1px solid #475569;
-    }
-
-    .btn-outline:hover {
-      background: #334155;
-      color: #f1f5f9;
-    }
-
-    .alert {
-      padding: 1rem 1.25rem;
-      border-radius: 12px;
-      margin-top: 1rem;
+    .error-content {
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      color: #fca5a5;
       font-size: 0.9rem;
     }
 
-    .alert-error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
+    .error-icon {
+      color: #ef4444;
     }
 
     .results-section {
@@ -216,14 +173,19 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      margin: 0;
     }
-
-    .section-header h2 i { color: #6366f1; }
 
     .action-buttons {
       display: flex;
       gap: 0.5rem;
+      align-items: center;
       flex-wrap: wrap;
+    }
+
+    .btn-divider {
+      height: 32px;
+      margin: 0 4px;
     }
   `]
 })

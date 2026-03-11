@@ -22,6 +22,11 @@ export interface ScriptResponse {
   scripts: AutomationScript[];
 }
 
+export interface ExecutionResult {
+  testCaseId: string;
+  status: string;
+}
+
 export interface DashboardStats {
   totalTests: number;
   passedTests: number;

@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -22,9 +21,9 @@ public class TestGeneratorService {
 
     private final OpenAiService openAiService;
     private final AutomationScriptService automationScriptService;
+    private final TestExecutionSimulatorService testExecutionSimulatorService;
     private final List<TestCase> currentTestCases = new CopyOnWriteArrayList<>();
     private final List<AutomationScript> currentScripts = new CopyOnWriteArrayList<>();
-    private final SecureRandom random = new SecureRandom();
 
     public TestCaseResponse generateTestCases(String requirement) {
         log.info("Generating test cases for requirement: {}", requirement);
@@ -58,19 +57,11 @@ public class TestGeneratorService {
     }
 
     public List<ExecutionResult> simulateExecution() {
-        log.info("Simulating test execution for {} test cases", currentTestCases.size());
+        return testExecutionSimulatorService.simulateExecution(new ArrayList<>(currentTestCases));
+    }
 
-        List<ExecutionResult> results = new ArrayList<>();
-        for (TestCase tc : currentTestCases) {
-            ExecutionStatus status = random.nextInt(100) < 70 ? ExecutionStatus.PASS : ExecutionStatus.FAIL;
-            tc.setExecutionStatus(status);
-            results.add(ExecutionResult.builder()
-                    .testCaseId(tc.getId())
-                    .status(status)
-                    .build());
-        }
-
-        return results;
+    public List<ExecutionResult> simulateExecution(List<TestCase> testCases) {
+        return testExecutionSimulatorService.simulateExecution(testCases);
     }
 
     public DashboardResponse getDashboard() {

@@ -1,44 +1,62 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { DashboardStats } from '../../models/models';
 
 @Component({
   selector: 'app-stats-cards',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatCardModule, MatIconModule],
   template: `
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon total"><i class="fas fa-list-check"></i></div>
-        <div class="stat-info">
-          <span class="stat-value">{{ stats.totalTests }}</span>
-          <span class="stat-label">Total Tests</span>
-        </div>
-      </div>
+      <mat-card class="stat-card">
+        <mat-card-content class="stat-content">
+          <div class="stat-icon total">
+            <mat-icon>checklist</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats.totalTests }}</span>
+            <span class="stat-label">Total Tests</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-      <div class="stat-card">
-        <div class="stat-icon passed"><i class="fas fa-circle-check"></i></div>
-        <div class="stat-info">
-          <span class="stat-value passed-text">{{ stats.passedTests }}</span>
-          <span class="stat-label">Passed</span>
-        </div>
-      </div>
+      <mat-card class="stat-card">
+        <mat-card-content class="stat-content">
+          <div class="stat-icon passed">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value passed-text">{{ stats.passedTests }}</span>
+            <span class="stat-label">Passed</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-      <div class="stat-card">
-        <div class="stat-icon failed"><i class="fas fa-circle-xmark"></i></div>
-        <div class="stat-info">
-          <span class="stat-value failed-text">{{ stats.failedTests }}</span>
-          <span class="stat-label">Failed</span>
-        </div>
-      </div>
+      <mat-card class="stat-card">
+        <mat-card-content class="stat-content">
+          <div class="stat-icon failed">
+            <mat-icon>cancel</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value failed-text">{{ stats.failedTests }}</span>
+            <span class="stat-label">Failed</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-      <div class="stat-card">
-        <div class="stat-icon pending"><i class="fas fa-clock"></i></div>
-        <div class="stat-info">
-          <span class="stat-value pending-text">{{ stats.notExecuted }}</span>
-          <span class="stat-label">Not Executed</span>
-        </div>
-      </div>
+      <mat-card class="stat-card">
+        <mat-card-content class="stat-content">
+          <div class="stat-icon pending">
+            <mat-icon>schedule</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value pending-text">{{ stats.notExecuted }}</span>
+            <span class="stat-label">Not Executed</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
   `,
   styles: [`
@@ -50,19 +68,19 @@ import { DashboardStats } from '../../models/models';
     }
 
     .stat-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .stat-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 0;
     }
 
     .stat-icon {
@@ -73,6 +91,12 @@ import { DashboardStats } from '../../models/models';
       align-items: center;
       justify-content: center;
       font-size: 1.4rem;
+    }
+
+    .stat-icon mat-icon {
+      font-size: 28px;
+      height: 28px;
+      width: 28px;
     }
 
     .stat-icon.total { background: rgba(99, 102, 241, 0.15); color: #6366f1; }

@@ -1,67 +1,89 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
 import { ApiService } from '../../services/api.service';
 import { TestCase, AutomationScript } from '../../models/models';
 
 @Component({
   selector: 'app-scripts-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule, MatCardModule, MatButtonModule,
+    MatIconModule, MatProgressSpinnerModule, MatDividerModule
+  ],
   template: `
     <div class="page">
       <div class="page-header">
-        <h1><i class="fas fa-code"></i> Automation Scripts</h1>
+        <h1>
+          <mat-icon class="header-icon">code</mat-icon>
+          Automation Scripts
+        </h1>
         <p>Generate Playwright Python automation scripts from your test cases</p>
       </div>
 
-      <!-- Generate button -->
-      <div class="card action-card">
-        <div class="action-content">
+      <!-- Action Card -->
+      <mat-card class="action-card">
+        <mat-card-content class="action-content">
           <div>
             <h3>Generate Playwright Scripts</h3>
-            <p>Convert your generated test cases into runnable Python automation scripts</p>
+            <p class="subtitle">Convert your generated test cases into runnable Python automation scripts</p>
           </div>
           <div class="action-buttons">
-            <button class="btn btn-primary" (click)="generateScripts()" [disabled]="loading">
-              <i class="fas" [ngClass]="loading ? 'fa-spinner fa-spin' : 'fa-code'"></i>
+            <button mat-raised-button color="primary"
+              (click)="generateScripts()" [disabled]="loading">
+              <mat-spinner *ngIf="loading" [diameter]="20" class="btn-spinner"></mat-spinner>
+              <mat-icon *ngIf="!loading">code</mat-icon>
               {{ loading ? 'Generating...' : 'Generate Scripts' }}
             </button>
-            <button *ngIf="scripts.length > 0" class="btn btn-success" (click)="downloadAll()">
-              <i class="fas fa-download"></i> Download All (.py)
+            <button mat-raised-button color="accent" *ngIf="scripts.length > 0"
+              (click)="downloadAll()">
+              <mat-icon>download</mat-icon> Download All (.py)
             </button>
-            <button *ngIf="scripts.length > 0" class="btn btn-outline" (click)="downloadPython()">
-              <i class="fas fa-file-code"></i> Download Python
+            <button mat-stroked-button *ngIf="scripts.length > 0"
+              (click)="downloadPython()">
+              <mat-icon>terminal</mat-icon> Download Python
             </button>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Error -->
-      <div *ngIf="error" class="alert alert-error">
-        <i class="fas fa-circle-exclamation"></i> {{ error }}
-      </div>
+      <mat-card *ngIf="error" class="error-card">
+        <mat-card-content class="error-content">
+          <mat-icon class="error-icon">error</mat-icon>
+          {{ error }}
+        </mat-card-content>
+      </mat-card>
 
       <!-- Scripts List -->
       <div *ngIf="scripts.length > 0" class="scripts-section">
-        <h2><i class="fas fa-file-code"></i> Generated Scripts ({{ scripts.length }})</h2>
+        <h2>
+          <mat-icon class="header-icon">description</mat-icon>
+          Generated Scripts ({{ scripts.length }})
+        </h2>
 
-        <div *ngFor="let script of scripts" class="script-card">
+        <mat-card *ngFor="let script of scripts" class="script-card">
           <div class="script-header">
-            <div>
+            <div class="script-info">
               <span class="script-id">{{ script.testCaseId }}</span>
               <span class="script-scenario">{{ script.scenario }}</span>
             </div>
-            <button class="btn btn-outline btn-sm" (click)="downloadScript(script)">
-              <i class="fas fa-download"></i> Download .py
+            <button mat-stroked-button (click)="downloadScript(script)">
+              <mat-icon>download</mat-icon> Download .py
             </button>
           </div>
+          <mat-divider></mat-divider>
           <pre class="script-code"><code>{{ script.scriptContent }}</code></pre>
-        </div>
+        </mat-card>
       </div>
 
-      <!-- Empty state -->
+      <!-- Empty State -->
       <div *ngIf="scripts.length === 0 && !loading" class="empty-state">
-        <i class="fas fa-file-code"></i>
+        <mat-icon class="empty-icon">code_off</mat-icon>
         <p>No scripts generated yet. Generate test cases first, then come back to create automation scripts.</p>
       </div>
     </div>
@@ -80,20 +102,13 @@ import { TestCase, AutomationScript } from '../../models/models';
       gap: 0.75rem;
     }
 
-    .page-header h1 i { color: #6366f1; }
-
     .page-header p {
       color: #94a3b8;
       margin-top: 0.5rem;
       font-size: 0.95rem;
     }
 
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 1.5rem;
-    }
+    .header-icon { color: #6366f1; }
 
     .action-content {
       display: flex;
@@ -106,9 +121,10 @@ import { TestCase, AutomationScript } from '../../models/models';
     .action-content h3 {
       color: #f1f5f9;
       font-size: 1.1rem;
+      margin: 0;
     }
 
-    .action-content p {
+    .subtitle {
       color: #94a3b8;
       font-size: 0.9rem;
       margin-top: 0.25rem;
@@ -117,45 +133,29 @@ import { TestCase, AutomationScript } from '../../models/models';
     .action-buttons {
       display: flex;
       gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1.25rem;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.875rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
+    .btn-spinner {
+      display: inline-block;
+      margin-right: 8px;
     }
 
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: #6366f1; color: white; }
-    .btn-primary:hover:not(:disabled) { background: #818cf8; }
-    .btn-success { background: #10b981; color: white; }
-    .btn-success:hover:not(:disabled) { background: #34d399; }
-    .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #475569; }
-    .btn-outline:hover { background: #334155; color: #f1f5f9; }
-    .btn-sm { padding: 0.4rem 0.85rem; font-size: 0.8rem; }
-
-    .alert {
-      padding: 1rem 1.25rem;
-      border-radius: 12px;
+    .error-card {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border: 1px solid rgba(239, 68, 68, 0.3) !important;
       margin-top: 1rem;
+    }
+
+    .error-content {
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      color: #fca5a5;
       font-size: 0.9rem;
     }
 
-    .alert-error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-    }
+    .error-icon { color: #ef4444; }
 
     .scripts-section {
       margin-top: 2rem;
@@ -171,31 +171,31 @@ import { TestCase, AutomationScript } from '../../models/models';
       gap: 0.5rem;
     }
 
-    .scripts-section h2 i { color: #6366f1; }
-
     .script-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
       margin-bottom: 1rem;
       overflow: hidden;
     }
 
     .script-header {
-      background: #334155;
       padding: 0.75rem 1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 0.5rem;
+      background: #334155;
+    }
+
+    .script-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
     .script-id {
       font-family: monospace;
       font-weight: 700;
       color: #6366f1;
-      margin-right: 0.75rem;
     }
 
     .script-scenario {
@@ -219,10 +219,11 @@ import { TestCase, AutomationScript } from '../../models/models';
       color: #64748b;
     }
 
-    .empty-state i {
+    .empty-icon {
       font-size: 3rem;
+      height: 48px;
+      width: 48px;
       margin-bottom: 1rem;
-      display: block;
     }
 
     .empty-state p {
@@ -244,7 +245,6 @@ export class ScriptsPageComponent {
     this.loading = true;
     this.error = '';
 
-    // First get current test cases, then generate scripts
     this.api.getCurrentTestCases().subscribe({
       next: (testCases) => {
         if (testCases.length === 0) {

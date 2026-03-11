@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ApiService } from '../../services/api.service';
 import { DashboardResponse, DashboardStats, TestCase } from '../../models/models';
 import { StatsCardsComponent } from '../../components/stats-cards/stats-cards.component';
@@ -8,14 +12,22 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, StatsCardsComponent, TestCaseTableComponent],
+  imports: [
+    CommonModule, MatCardModule, MatButtonModule, MatIconModule,
+    MatProgressBarModule, StatsCardsComponent, TestCaseTableComponent
+  ],
   template: `
     <div class="page">
       <div class="page-header">
-        <h1><i class="fas fa-chart-bar"></i> Dashboard</h1>
-        <p>Overview of test execution results</p>
-        <button class="btn btn-outline refresh-btn" (click)="loadDashboard()">
-          <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i> Refresh
+        <div>
+          <h1>
+            <mat-icon class="header-icon">dashboard</mat-icon>
+            Execution Dashboard
+          </h1>
+          <p>Overview of test execution results</p>
+        </div>
+        <button mat-stroked-button (click)="loadDashboard()">
+          <mat-icon [class.spinning]="loading">sync</mat-icon> Refresh
         </button>
       </div>
 
@@ -23,31 +35,42 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
       <app-stats-cards [stats]="stats"></app-stats-cards>
 
       <!-- Progress Bar -->
-      <div *ngIf="stats.totalTests > 0" class="card progress-card">
-        <h3>Execution Progress</h3>
-        <div class="progress-bar-container">
-          <div class="progress-bar">
-            <div class="progress-segment pass" [style.width.%]="passPercent"></div>
-            <div class="progress-segment fail" [style.width.%]="failPercent"></div>
-            <div class="progress-segment pending" [style.width.%]="pendingPercent"></div>
+      <mat-card *ngIf="stats.totalTests > 0" class="progress-card">
+        <mat-card-content>
+          <h3>Execution Progress</h3>
+          <div class="progress-bar-container">
+            <div class="progress-bar">
+              <div class="progress-segment pass" [style.width.%]="passPercent"></div>
+              <div class="progress-segment fail" [style.width.%]="failPercent"></div>
+              <div class="progress-segment pending" [style.width.%]="pendingPercent"></div>
+            </div>
+            <div class="progress-legend">
+              <span class="legend-item">
+                <span class="dot pass"></span> Pass {{ passPercent | number:'1.0-0' }}%
+              </span>
+              <span class="legend-item">
+                <span class="dot fail"></span> Fail {{ failPercent | number:'1.0-0' }}%
+              </span>
+              <span class="legend-item">
+                <span class="dot pending"></span> Not Executed {{ pendingPercent | number:'1.0-0' }}%
+              </span>
+            </div>
           </div>
-          <div class="progress-legend">
-            <span class="legend-item"><span class="dot pass"></span> Pass {{ passPercent | number:'1.0-0' }}%</span>
-            <span class="legend-item"><span class="dot fail"></span> Fail {{ failPercent | number:'1.0-0' }}%</span>
-            <span class="legend-item"><span class="dot pending"></span> Not Executed {{ pendingPercent | number:'1.0-0' }}%</span>
-          </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Test Cases Table -->
       <div *ngIf="testCases.length > 0" class="results-section">
-        <h2><i class="fas fa-table"></i> Test Case Results</h2>
+        <h2>
+          <mat-icon class="header-icon">table_chart</mat-icon>
+          Test Case Results
+        </h2>
         <app-test-case-table [testCases]="testCases" [showStatus]="true"></app-test-case-table>
       </div>
 
       <!-- Empty State -->
       <div *ngIf="testCases.length === 0 && !loading" class="empty-state">
-        <i class="fas fa-chart-pie"></i>
+        <mat-icon class="empty-icon">pie_chart</mat-icon>
         <p>No test execution data available. Generate and simulate test cases first.</p>
       </div>
     </div>
@@ -55,7 +78,9 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
   styles: [`
     .page-header {
       margin-bottom: 2rem;
-      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
     }
 
     .page-header h1 {
@@ -67,49 +92,23 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
       gap: 0.75rem;
     }
 
-    .page-header h1 i { color: #6366f1; }
-
     .page-header p {
       color: #94a3b8;
       margin-top: 0.5rem;
       font-size: 0.95rem;
     }
 
-    .refresh-btn {
-      position: absolute;
-      right: 0;
-      top: 0;
+    .header-icon { color: #6366f1; }
+
+    .spinning {
+      animation: spin 1s linear infinite;
     }
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1.25rem;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.875rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
     }
 
-    .btn-outline {
-      background: transparent;
-      color: #94a3b8;
-      border: 1px solid #475569;
-    }
-
-    .btn-outline:hover {
-      background: #334155;
-      color: #f1f5f9;
-    }
-
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 1.5rem;
+    .progress-card {
       margin-bottom: 2rem;
     }
 
@@ -174,18 +173,17 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
       gap: 0.5rem;
     }
 
-    .results-section h2 i { color: #6366f1; }
-
     .empty-state {
       text-align: center;
       padding: 4rem 2rem;
       color: #64748b;
     }
 
-    .empty-state i {
+    .empty-icon {
       font-size: 3rem;
+      height: 48px;
+      width: 48px;
       margin-bottom: 1rem;
-      display: block;
     }
 
     .empty-state p {

@@ -6,7 +6,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
   background: #0f172a;
   color: #e2e8f0;
   min-height: 100vh;
@@ -53,3 +53,161 @@ button {
   background: var(--border);
   border-radius: 4px;
 }
+
+/* ===== Angular Material Dark Theme Overrides ===== */
+
+/* Toolbar */
+.mat-toolbar.mat-primary {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-bottom: 1px solid #334155;
+}
+
+/* Cards */
+.mat-mdc-card {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #334155;
+  border-radius: 16px !important;
+}
+
+.mat-mdc-card-subtitle {
+  color: #94a3b8 !important;
+}
+
+/* Table */
+.mat-mdc-table {
+  background: transparent !important;
+}
+
+.mat-mdc-header-row {
+  background: #334155 !important;
+}
+
+.mat-mdc-header-cell {
+  color: #e2e8f0 !important;
+  border-bottom-color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+.mat-mdc-cell {
+  color: #cbd5e1 !important;
+  border-bottom-color: #334155 !important;
+}
+
+.mat-mdc-row:hover {
+  background: rgba(99, 102, 241, 0.05) !important;
+}
+
+/* Form Fields */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mdc-text-field--outlined {
+  background: #334155 !important;
+}
+
+.mdc-text-field--outlined .mdc-notched-outline > * {
+  border-color: #475569 !important;
+}
+
+.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline > * {
+  border-color: #6366f1 !important;
+}
+
+.mat-mdc-form-field .mdc-text-field__input {
+  color: #f1f5f9 !important;
+  caret-color: #6366f1 !important;
+}
+
+.mat-mdc-form-field .mat-mdc-floating-label {
+  color: #94a3b8 !important;
+}
+
+.mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: #6366f1 !important;
+}
+
+/* Buttons */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  background-color: #6366f1 !important;
+  color: white !important;
+}
+
+.mat-mdc-raised-button.mat-primary:hover,
+.mat-mdc-unelevated-button.mat-primary:hover {
+  background-color: #818cf8 !important;
+}
+
+.mat-mdc-raised-button.mat-accent,
+.mat-mdc-unelevated-button.mat-accent {
+  background-color: #10b981 !important;
+  color: white !important;
+}
+
+.mat-mdc-raised-button.mat-accent:hover,
+.mat-mdc-unelevated-button.mat-accent:hover {
+  background-color: #34d399 !important;
+}
+
+.mat-mdc-raised-button.mat-warn,
+.mat-mdc-unelevated-button.mat-warn {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.mat-mdc-outlined-button {
+  border-color: #475569 !important;
+  color: #94a3b8 !important;
+}
+
+.mat-mdc-outlined-button:hover {
+  background: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+.mat-mdc-button:not(:disabled) {
+  color: #94a3b8;
+}
+
+.mat-mdc-button.active-link {
+  color: #6366f1 !important;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+/* Progress Bar */
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-active-indicator-color: #10b981;
+  --mdc-linear-progress-track-color: #334155;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Progress Spinner in buttons */
+.mat-mdc-progress-spinner circle {
+  stroke: currentColor !important;
+}
+
+/* Divider */
+.mat-divider {
+  border-color: #334155 !important;
+}
+
+/* ===== Custom Utility Classes ===== */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-positive { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.badge-negative { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.badge-edge { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.badge-pass { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.badge-fail { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.badge-not-executed { background: rgba(100, 116, 139, 0.15); color: #94a3b8; }

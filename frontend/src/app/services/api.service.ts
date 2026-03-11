@@ -6,7 +6,8 @@ import {
   TestCase,
   ScriptResponse,
   DashboardResponse,
-  AutomationScript
+  AutomationScript,
+  ExecutionResult
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +30,13 @@ export class ApiService {
 
   simulateExecution(): Observable<TestCase[]> {
     return this.http.post<TestCase[]>(`${this.baseUrl}/test-cases/simulate`, {});
+  }
+
+  simulateExecutionWithInput(testCases: TestCase[]): Observable<ExecutionResult[]> {
+    return this.http.post<ExecutionResult[]>(
+      `${this.baseUrl}/test-cases/simulate-execution`,
+      { testCases }
+    );
   }
 
   // Scripts
