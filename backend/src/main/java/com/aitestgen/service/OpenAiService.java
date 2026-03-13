@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +30,16 @@ import java.util.regex.Pattern;
 @Slf4j
 public class OpenAiService {
 
-    private final WebClient openAiWebClient;
+    private final WebClient geminiWebClient;
     private final ObjectMapper objectMapper;
 
-    @Value("${openai.api.model}")
+    @Value("${gemini.api.model}")
     private String model;
+
+    @Value("${gemini.api.key}")
+    private String apiKey;
+
+    private static final String GEMINI_BASE_URL = "https://generativelanguage.googleapis.com";
 
     private static final String TEST_CASE_SYSTEM_PROMPT = """
             You are a senior QA engineer with deep expertise in software testing.
@@ -86,7 +92,7 @@ public class OpenAiService {
         List<TestCase> testCases;
         try {
             String userPrompt = "Generate test cases for the following requirement:\n\n" + requirement;
-            String response = callOpenAi(TEST_CASE_SYSTEM_PROMPT, userPrompt);
+            String response = callGemini(TEST_CASE_SYSTEM_PROMPT, userPrompt);
             testCases = parseTestCases(response);
         } catch (Exception e) {
             log.warn("AI call failed, using fallback test cases: {}", e.getMessage());
@@ -135,25 +141,31 @@ public class OpenAiService {
                 testCase.getTestType()
         );
 
-        return callOpenAi(AUTOMATION_SCRIPT_SYSTEM_PROMPT, testCaseInfo);
+        return callGemini(AUTOMATION_SCRIPT_SYSTEM_PROMPT, testCaseInfo);
     }
 
     /**
-     * Calls the OpenAI chat completions API with the given system and user prompts.
+     * Calls the Gemini generateContent API with the given system and user prompts.
      */
-    private String callOpenAi(String systemPrompt, String userMessage) {
+    private String callGemini(String systemPrompt, String userMessage) {
         Map<String, Object> requestBody = Map.of(
-                "model", model,
-                "messages", List.of(
-                        Map.of("role", "system", "content", systemPrompt),
-                        Map.of("role", "user", "content", userMessage)
+                "system_instruction", Map.of(
+                        "parts", List.of(Map.of("text", systemPrompt))
                 ),
-                "temperature", 0.7,
-                "max_tokens", 3000
+                "contents", List.of(
+                        Map.of("role", "user", "parts", List.of(Map.of("text", userMessage)))
+                ),
+                "generationConfig", Map.of(
+                        "temperature", 0.7,
+                        "maxOutputTokens", 3000
+                )
         );
 
+        URI uri = URI.create(GEMINI_BASE_URL + "/v1beta/models/" + model + ":generateContent?key=" + apiKey);
+
         try {
-            String responseJson = openAiWebClient.post()
+            String responseJson = geminiWebClient.post()
+                    .uri(uri)
                     .bodyValue(requestBody)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -164,20 +176,20 @@ public class OpenAiService {
             }
 
             JsonNode root = objectMapper.readTree(responseJson);
-            JsonNode choices = root.path("choices");
-            if (choices.isMissingNode() || !choices.isArray() || choices.isEmpty()) {
+            JsonNode candidates = root.path("candidates");
+            if (candidates.isMissingNode() || !candidates.isArray() || candidates.isEmpty()) {
                 throw new RuntimeException("Invalid response structure from AI service");
             }
 
-            return choices.get(0).path("message").path("content").asText();
+            return candidates.get(0).path("content").path("parts").get(0).path("text").asText();
 
         } catch (WebClientResponseException e) {
-            log.error("OpenAI API returned HTTP {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Gemini API returned HTTP {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("AI service returned an error (HTTP " + e.getStatusCode() + ")");
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            log.error("OpenAI API call failed: {}", e.getMessage(), e);
+            log.error("Gemini API call failed: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to communicate with AI service: " + e.getMessage());
         }
     }

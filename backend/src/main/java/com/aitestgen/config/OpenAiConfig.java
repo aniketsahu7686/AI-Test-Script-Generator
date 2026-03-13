@@ -8,17 +8,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class OpenAiConfig {
 
-    @Value("${openai.api.key}")
-    private String apiKey;
-
-    @Value("${openai.api.url}")
-    private String apiUrl;
-
     @Bean
-    public WebClient openAiWebClient() {
+    public WebClient geminiWebClient() {
         return WebClient.builder()
-                .baseUrl(apiUrl)
-                .defaultHeader("Authorization", "Bearer " + apiKey)
+                .baseUrl("https://generativelanguage.googleapis.com")
                 .defaultHeader("Content-Type", "application/json")
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024))
                 .build();
