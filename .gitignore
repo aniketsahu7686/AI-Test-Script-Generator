@@ -4,6 +4,11 @@ Thumbs.db
 
 # --- Logic & Environment ---
 .env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 *.log
 
 # --- IDEs ---

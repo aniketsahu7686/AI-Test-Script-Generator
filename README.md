@@ -1,6 +1,6 @@
 # AI Test Script Generator Platform
 
-A full-stack web application that converts software requirements into structured test cases and Playwright Python automation scripts using OpenAI.
+A full-stack web application that converts software requirements into structured test cases and Playwright Python automation scripts using Gemini.
 
 ## Architecture
 
@@ -55,27 +55,26 @@ A full-stack web application that converts software requirements into structured
 
 - **Java 17+** and **Maven 3.8+**
 - **Node.js 18+** and **npm 9+**
-- **OpenAI API Key**
+- **Gemini API Key**
 
 ## Backend Setup
 
 ```bash
 cd backend
 
-# Set your OpenAI API key (choose one method):
-
-# Option A: Environment variable
-export OPENAI_API_KEY=sk-your-actual-key
-
-# Option B: Edit application.properties directly
-# openai.api.key=sk-your-actual-key
+# Set your Gemini API key (recommended: local .env file)
+# 1) Copy backend/.env.example to backend/.env
+# 2) Set GEMINI_API_KEY in backend/.env
+#
+# Alternative: environment variable
+# export GEMINI_API_KEY=your-gemini-key
 
 # Build and run
 mvn clean install
 mvn spring-boot:run
 ```
 
-Backend starts on **http://localhost:8080**
+Backend starts on **http://localhost:8081**
 
 ## Frontend Setup
 

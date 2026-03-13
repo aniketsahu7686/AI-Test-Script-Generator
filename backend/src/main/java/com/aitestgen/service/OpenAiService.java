@@ -148,6 +148,10 @@ public class OpenAiService {
      * Calls the Gemini generateContent API with the given system and user prompts.
      */
     private String callGemini(String systemPrompt, String userMessage) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new RuntimeException("Gemini API key is missing. Set GEMINI_API_KEY in environment or backend/.env.");
+        }
+
         Map<String, Object> requestBody = Map.of(
                 "system_instruction", Map.of(
                         "parts", List.of(Map.of("text", systemPrompt))
