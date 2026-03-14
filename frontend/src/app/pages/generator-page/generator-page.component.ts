@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { ApiService } from '../../services/api.service';
+import { TestGeneratorService } from '../../services/test-generator.service';
 import { TestCase } from '../../models/models';
 import { TestCaseTableComponent } from '../../components/test-case-table/test-case-table.component';
 
@@ -49,7 +50,7 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
             [disabled]="loading || !requirement.trim()">
             <mat-spinner *ngIf="loading" [diameter]="20" class="btn-spinner"></mat-spinner>
             <mat-icon *ngIf="!loading">auto_fix_high</mat-icon>
-            {{ loading ? 'Generating...' : 'Generate Test Cases' }}
+            {{ loading ? 'Generating test cases...' : 'Generate Test Cases' }}
           </button>
         </mat-card-actions>
       </mat-card>
@@ -197,16 +198,22 @@ export class GeneratorPageComponent {
   error = '';
   hasExecutionResults = false;
 
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private testGeneratorService: TestGeneratorService
+  ) {}
 
   generateTestCases() {
     this.loading = true;
     this.error = '';
     this.hasExecutionResults = false;
 
-    this.api.generateTestCases(this.requirement).subscribe({
+    this.testGeneratorService.generateTestCases(this.requirement).subscribe({
       next: (res) => {
         this.testCases = res.testCases;
+        if (this.testCases.length === 0) {
+          this.error = 'No test cases were returned by the API.';
+        }
         this.loading = false;
       },
       error: (err) => {

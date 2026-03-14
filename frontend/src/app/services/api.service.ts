@@ -10,9 +10,11 @@ import {
   ExecutionResult
 } from '../models/models';
 
+const API_BASE_URL = 'https://ai-test-script-generator.onrender.com';
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private baseUrl = 'http://localhost:8081/api';
+  private baseUrl = `${API_BASE_URL}/api`;
 
   constructor(private http: HttpClient) {}
 
