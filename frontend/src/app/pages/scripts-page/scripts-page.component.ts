@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -83,9 +83,14 @@ import { TestCase, AutomationScript } from '../../models/models';
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="scripts.length === 0 && !loading" class="empty-state">
+      <div *ngIf="scripts.length === 0 && !loading && testCases.length === 0" class="empty-state">
         <mat-icon class="empty-icon">code_off</mat-icon>
         <p>No scripts generated yet. Generate test cases first, then come back to create automation scripts.</p>
+      </div>
+
+      <div *ngIf="scripts.length === 0 && !loading && testCases.length > 0" class="empty-state">
+        <mat-icon class="empty-icon">fact_check</mat-icon>
+        <p>{{ testCases.length }} test cases are ready. Click Generate Scripts to create automation scripts.</p>
       </div>
     </div>
   `,
@@ -234,7 +239,7 @@ import { TestCase, AutomationScript } from '../../models/models';
     }
   `]
 })
-export class ScriptsPageComponent {
+export class ScriptsPageComponent implements OnInit {
   scripts: AutomationScript[] = [];
   testCases: TestCase[] = [];
   loading = false;
@@ -245,12 +250,37 @@ export class ScriptsPageComponent {
     private testCaseState: TestCaseStateService
   ) {}
 
+  ngOnInit() {
+    const cachedTestCases = this.testCaseState.getTestCases();
+    if (cachedTestCases.length > 0) {
+      this.testCases = cachedTestCases;
+      return;
+    }
+
+    this.api.getCurrentTestCases().subscribe({
+      next: (testCases) => {
+        if (testCases.length > 0) {
+          this.testCases = testCases;
+          this.testCaseState.save(
+            this.testCaseState.getRequirement(),
+            testCases,
+            this.testCaseState.hasExecutionResults()
+          );
+        }
+      },
+      error: () => {
+        // Keep quiet; explicit Generate action already shows errors.
+      }
+    });
+  }
+
   generateScripts() {
     this.loading = true;
     this.error = '';
     const cachedTestCases = this.testCaseState.getTestCases();
 
     if (cachedTestCases.length > 0) {
+      this.testCases = cachedTestCases;
       this.generateScriptsFromCases(cachedTestCases);
       return;
     }
@@ -263,6 +293,7 @@ export class ScriptsPageComponent {
           return;
         }
 
+        this.testCases = testCases;
         this.testCaseState.save(this.testCaseState.getRequirement(), testCases, this.testCaseState.hasExecutionResults());
         this.generateScriptsFromCases(testCases);
       },
