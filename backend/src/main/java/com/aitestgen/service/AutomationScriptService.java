@@ -72,6 +72,10 @@ public class AutomationScriptService {
         return new ArrayList<>(generatedScripts);
     }
 
+    public void clearGeneratedScripts() {
+        generatedScripts.clear();
+    }
+
     private String generateFallbackScript(TestCase tc) {
         return String.format("""
                 from playwright.sync_api import sync_playwright

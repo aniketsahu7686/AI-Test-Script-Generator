@@ -83,4 +83,9 @@ export class ApiService {
   getDashboard(): Observable<DashboardResponse> {
     return this.http.get<DashboardResponse>(`${this.baseUrl}/dashboard`);
   }
+
+  // Reset
+  resetAllData(): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/reset`);
+  }
 }

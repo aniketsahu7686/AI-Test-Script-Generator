@@ -92,4 +92,11 @@ public class TestGeneratorService {
     public List<AutomationScript> getCurrentScripts() {
         return new ArrayList<>(currentScripts);
     }
+
+    public void resetAllData() {
+        currentTestCases.clear();
+        currentScripts.clear();
+        automationScriptService.clearGeneratedScripts();
+        log.info("All generated test data has been reset");
+    }
 }

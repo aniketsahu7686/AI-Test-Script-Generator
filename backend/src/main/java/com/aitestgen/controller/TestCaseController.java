@@ -50,4 +50,10 @@ public class TestCaseController {
         List<ExecutionResult> results = testExecutionSimulatorService.simulateExecution(request.getTestCases());
         return ResponseEntity.ok(results);
     }
+
+    @DeleteMapping("/reset")
+    public ResponseEntity<Void> resetAllGeneratedData() {
+        testGeneratorService.resetAllData();
+        return ResponseEntity.noContent().build();
+    }
 }

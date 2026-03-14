@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { ApiService } from '../../services/api.service';
+import { TestCaseStateService } from '../../services/test-case-state.service';
 
 @Component({
   selector: 'app-navbar',
@@ -25,6 +27,10 @@ import { MatIconModule } from '@angular/material/icon';
         <a mat-button routerLink="/dashboard" routerLinkActive="active-link">
           <mat-icon>dashboard</mat-icon> Dashboard
         </a>
+        <button mat-stroked-button class="reset-btn" (click)="resetAll()" [disabled]="resetting">
+          <mat-icon>{{ resetting ? 'hourglass_top' : 'restart_alt' }}</mat-icon>
+          {{ resetting ? 'Resetting...' : 'Reset' }}
+        </button>
       </nav>
     </mat-toolbar>
   `,
@@ -71,6 +77,56 @@ import { MatIconModule } from '@angular/material/icon';
       font-size: 0.9rem;
       border-radius: 8px;
     }
+
+    .reset-btn {
+      margin-left: 0.5rem;
+      border-color: rgba(248, 113, 113, 0.45) !important;
+      color: #fecaca !important;
+    }
+
+    .reset-btn:disabled {
+      opacity: 0.7;
+    }
   `]
 })
-export class NavbarComponent {}
+export class NavbarComponent {
+  resetting = false;
+
+  constructor(
+    private api: ApiService,
+    private testCaseState: TestCaseStateService,
+    private router: Router
+  ) {}
+
+  resetAll() {
+    if (this.resetting) {
+      return;
+    }
+
+    const confirmReset = window.confirm(
+      'Reset all generated test cases and scripts? This clears current session data.'
+    );
+
+    if (!confirmReset) {
+      return;
+    }
+
+    this.resetting = true;
+
+    this.api.resetAllData().subscribe({
+      next: () => this.finalizeReset(false),
+      error: () => this.finalizeReset(true)
+    });
+  }
+
+  private finalizeReset(withWarning: boolean) {
+    this.testCaseState.clear();
+    this.resetting = false;
+
+    this.router.navigate(['/generator']);
+
+    if (withWarning) {
+      window.alert('Local reset completed, but backend reset failed. Try again in a moment.');
+    }
+  }
+}
