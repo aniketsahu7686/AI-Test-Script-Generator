@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ApiService } from '../../services/api.service';
+import { TestCaseStateService } from '../../services/test-case-state.service';
 import { DashboardResponse, DashboardStats, TestCase } from '../../models/models';
 import { StatsCardsComponent } from '../../components/stats-cards/stats-cards.component';
 import { TestCaseTableComponent } from '../../components/test-case-table/test-case-table.component';
@@ -202,9 +203,18 @@ export class DashboardPageComponent implements OnInit {
   get failPercent() { return this.stats.totalTests ? (this.stats.failedTests / this.stats.totalTests) * 100 : 0; }
   get pendingPercent() { return this.stats.totalTests ? (this.stats.notExecuted / this.stats.totalTests) * 100 : 0; }
 
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private testCaseState: TestCaseStateService
+  ) {}
 
   ngOnInit() {
+    const cachedTestCases = this.testCaseState.getTestCases();
+    if (cachedTestCases.length > 0) {
+      this.testCases = cachedTestCases;
+      this.stats = this.computeStats(cachedTestCases);
+    }
+
     this.loadDashboard();
   }
 
@@ -212,13 +222,29 @@ export class DashboardPageComponent implements OnInit {
     this.loading = true;
     this.api.getDashboard().subscribe({
       next: (res: DashboardResponse) => {
-        this.stats = res.stats;
-        this.testCases = res.testCases;
+        if (res.testCases?.length > 0) {
+          this.stats = res.stats;
+          this.testCases = res.testCases;
+          this.testCaseState.save(this.testCaseState.getRequirement(), res.testCases, this.testCaseState.hasExecutionResults());
+        }
         this.loading = false;
       },
       error: () => {
         this.loading = false;
       }
     });
+  }
+
+  private computeStats(testCases: TestCase[]): DashboardStats {
+    const passedTests = testCases.filter(tc => tc.executionStatus === 'PASS').length;
+    const failedTests = testCases.filter(tc => tc.executionStatus === 'FAIL').length;
+    const notExecuted = testCases.length - passedTests - failedTests;
+
+    return {
+      totalTests: testCases.length,
+      passedTests,
+      failedTests,
+      notExecuted
+    };
   }
 }

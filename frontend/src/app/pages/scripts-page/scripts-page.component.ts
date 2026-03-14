@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { ApiService } from '../../services/api.service';
+import { TestCaseStateService } from '../../services/test-case-state.service';
 import { TestCase, AutomationScript } from '../../models/models';
 
 @Component({
@@ -239,11 +240,20 @@ export class ScriptsPageComponent {
   loading = false;
   error = '';
 
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private testCaseState: TestCaseStateService
+  ) {}
 
   generateScripts() {
     this.loading = true;
     this.error = '';
+    const cachedTestCases = this.testCaseState.getTestCases();
+
+    if (cachedTestCases.length > 0) {
+      this.generateScriptsFromCases(cachedTestCases);
+      return;
+    }
 
     this.api.getCurrentTestCases().subscribe({
       next: (testCases) => {
@@ -253,19 +263,24 @@ export class ScriptsPageComponent {
           return;
         }
 
-        this.api.generateScripts(testCases).subscribe({
-          next: (res) => {
-            this.scripts = res.scripts;
-            this.loading = false;
-          },
-          error: (err) => {
-            this.error = err.error?.error || 'Failed to generate scripts.';
-            this.loading = false;
-          }
-        });
+        this.testCaseState.save(this.testCaseState.getRequirement(), testCases, this.testCaseState.hasExecutionResults());
+        this.generateScriptsFromCases(testCases);
       },
       error: () => {
         this.error = 'Failed to fetch test cases.';
+        this.loading = false;
+      }
+    });
+  }
+
+  private generateScriptsFromCases(testCases: TestCase[]) {
+    this.api.generateScripts(testCases).subscribe({
+      next: (res) => {
+        this.scripts = res.scripts;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.error?.error || 'Failed to generate scripts.';
         this.loading = false;
       }
     });

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { ApiService } from '../../services/api.service';
 import { TestGeneratorService } from '../../services/test-generator.service';
+import { TestCaseStateService } from '../../services/test-case-state.service';
 import { TestCase } from '../../models/models';
 import { TestCaseTableComponent } from '../../components/test-case-table/test-case-table.component';
 
@@ -190,7 +191,7 @@ import { TestCaseTableComponent } from '../../components/test-case-table/test-ca
     }
   `]
 })
-export class GeneratorPageComponent {
+export class GeneratorPageComponent implements OnInit {
   requirement = '';
   testCases: TestCase[] = [];
   loading = false;
@@ -200,8 +201,15 @@ export class GeneratorPageComponent {
 
   constructor(
     private api: ApiService,
-    private testGeneratorService: TestGeneratorService
+    private testGeneratorService: TestGeneratorService,
+    private testCaseState: TestCaseStateService
   ) {}
+
+  ngOnInit() {
+    this.requirement = this.testCaseState.getRequirement();
+    this.testCases = this.testCaseState.getTestCases();
+    this.hasExecutionResults = this.testCaseState.hasExecutionResults();
+  }
 
   generateTestCases() {
     this.loading = true;
@@ -211,6 +219,7 @@ export class GeneratorPageComponent {
     this.testGeneratorService.generateTestCases(this.requirement).subscribe({
       next: (res) => {
         this.testCases = res.testCases;
+        this.testCaseState.save(this.requirement, this.testCases, false);
         if (this.testCases.length === 0) {
           this.error = 'No test cases were returned by the API.';
         }
@@ -229,6 +238,7 @@ export class GeneratorPageComponent {
       next: (res) => {
         this.testCases = res;
         this.hasExecutionResults = true;
+        this.testCaseState.save(this.requirement, this.testCases, true);
         this.simulating = false;
       },
       error: () => {
