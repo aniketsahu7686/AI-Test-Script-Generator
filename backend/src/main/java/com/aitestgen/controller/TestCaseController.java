@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/test-cases")
+@RequestMapping("/api")
+@CrossOrigin(origins = "https://69b51ed---qa-testingproject.netlify.app")
 @RequiredArgsConstructor
 public class TestCaseController {
 
@@ -29,12 +30,12 @@ public class TestCaseController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/test-cases")
     public ResponseEntity<List<TestCase>> getCurrentTestCases() {
         return ResponseEntity.ok(testGeneratorService.getCurrentTestCases());
     }
 
-    @PostMapping("/simulate")
+    @PostMapping("/test-cases/simulate")
     public ResponseEntity<List<TestCase>> simulateExecution() {
         testGeneratorService.simulateExecution();
         return ResponseEntity.ok(testGeneratorService.getCurrentTestCases());
@@ -44,7 +45,7 @@ public class TestCaseController {
      * POST /api/test-cases/simulate-execution
      * Accepts a list of test cases and returns simulated execution results.
      */
-    @PostMapping("/simulate-execution")
+    @PostMapping("/test-cases/simulate-execution")
     public ResponseEntity<List<ExecutionResult>> simulateExecutionWithInput(
             @Valid @RequestBody ScriptRequest request) {
         List<ExecutionResult> results = testExecutionSimulatorService.simulateExecution(request.getTestCases());
