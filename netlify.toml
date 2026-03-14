@@ -4,6 +4,12 @@
   publish = "dist/ai-test-generator-ui/browser"
 
 [[redirects]]
+  from = "/api/*"
+  to = "https://ai-test-script-generator.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

@@ -10,7 +10,8 @@ import {
   ExecutionResult
 } from '../models/models';
 
-const API_BASE_URL = 'https://ai-test-script-generator.onrender.com';
+const isNetlifyHost = typeof window !== 'undefined' && window.location.hostname.endsWith('netlify.app');
+const API_BASE_URL = isNetlifyHost ? '' : 'https://ai-test-script-generator.onrender.com';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
