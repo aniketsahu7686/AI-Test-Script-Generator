@@ -113,20 +113,12 @@ export class NavbarComponent {
 
     this.resetting = true;
 
-    this.api.resetAllData().subscribe({
-      next: () => this.finalizeReset(false),
-      error: () => this.finalizeReset(true)
-    });
-  }
-
-  private finalizeReset(withWarning: boolean) {
+    // Clear local state and navigate immediately — don't block on backend
     this.testCaseState.clear();
     this.resetting = false;
-
     this.router.navigate(['/generator']);
 
-    if (withWarning) {
-      window.alert('Local reset completed, but backend reset failed. Try again in a moment.');
-    }
+    // Fire backend reset best-effort (backend is in-memory; next generate overwrites it anyway)
+    this.api.resetAllData().subscribe({ error: () => {} });
   }
 }
