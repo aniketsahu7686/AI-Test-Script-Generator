@@ -16,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "https://69b51ed---qa-testingproject.netlify.app")
 @RequiredArgsConstructor
 public class TestCaseController {
 
